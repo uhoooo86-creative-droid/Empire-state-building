@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Big Cat Empire Elevator</title>
+<style>
+:root{
+  --navy:#102b4a; --yellow:#ffd84d; --orange:#f47721;
+  --green:#35a853; --red:#ef4b31; --purple:#7657d5;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial Rounded MT Bold,Trebuchet MS,Arial,sans-serif;background:#eef9ff;touch-action:manipulation}
+button{font:inherit;cursor:pointer}
+.screen{position:fixed;inset:0;display:none}.screen.active{display:flex}
+
+/* START PAGE */
+#startScreen{
+  align-items:center;justify-content:center;overflow:hidden;
+  background:radial-gradient(circle at 50% 25%,#ffffff 0 36%,#dff5ff 75%,#bfe8ff 100%);
+}
+.start-brand{
+  position:absolute;left:clamp(14px,3vw,45px);top:clamp(14px,3vw,40px);
+  display:flex;align-items:center;gap:13px;z-index:5;
+  padding:10px 17px 10px 10px;border-radius:23px;background:#ffffffed;
+  border:4px solid var(--navy);box-shadow:0 7px 15px #0003;
+}
+.start-brand img{width:clamp(58px,8vw,100px);height:clamp(58px,8vw,100px);object-fit:cover;border-radius:18px}
+.brand-copy b{display:block;color:var(--navy);font-size:clamp(21px,3vw,42px);letter-spacing:1px}
+.brand-copy span{color:var(--orange);font-size:clamp(12px,1.5vw,20px);font-weight:bold}
+.start-title{
+  position:absolute;top:clamp(120px,16vh,175px);left:50%;transform:translateX(-50%);
+  text-align:center;z-index:4;width:94%;
+}
+.start-title h1{margin:0;color:var(--navy);font-size:clamp(31px,5vw,67px);text-shadow:0 3px white}
+.start-title p{margin:5px 0;color:#3b6280;font-size:clamp(16px,2vw,28px);font-weight:bold}
+#buildingImage{
+  position:absolute;left:50%;top:9%;height:76%;max-width:67vw;
+  transform:translateX(-50%);object-fit:contain;filter:drop-shadow(0 15px 13px #0003);
+}
+.start-reward{
+  position:absolute;right:clamp(14px,3vw,45px);top:clamp(14px,3vw,40px);
+  z-index:5;padding:12px 18px;border-radius:22px;text-align:center;
+  background:#fff7ce;border:4px solid #9b6a00;box-shadow:0 7px 15px #0003;
+  color:#704c00;font-weight:900;font-size:clamp(15px,2vw,25px)
+}
+.start-reward .stars{font-size:clamp(21px,3vw,40px)}
+#startBtn{
+  position:absolute;bottom:4.5%;left:50%;transform:translateX(-50%);z-index:8;
+  width:min(44vw,380px);height:clamp(70px,10vh,100px);border:0;border-radius:999px;
+  color:white;font-size:clamp(32px,5vw,57px);font-weight:900;letter-spacing:2px;
+  background:linear-gradient(#ff9d23,#ef4b1b);box-shadow:0 9px 0 #a93317,0 16px 25px #0005;
+}
+#startBtn:active{transform:translate(-50%,6px);box-shadow:0 3px 0 #a93317}
+@media(max-width:700px){
+  .brand-copy span{display:none}.start-brand{padding-right:10px}
+  .start-reward{top:auto;bottom:16%;right:10px}
+  #buildingImage{height:71%;top:14%;max-width:94vw}
+  .start-title{top:110px}
+}
+
+/* LEVEL MENU */
+#levelScreen{align-items:center;justify-content:center;flex-direction:column;padding:25px;background:linear-gradient(#60c7ff,#edfaff)}
+#levelScreen h1{margin:0 0 8px;color:var(--navy);font-size:clamp(36px,6vw,72px)}
+#levelScreen>p{margin:0 0 22px;color:#40617d;font-size:clamp(17px,2.5vw,29px)}
+.levels{width:min(950px,96vw);display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.level{min-height:220px;border:0;border-radius:28px;padding:18px;color:white;box-shadow:0 9px 0 #0003,0 15px 25px #0003}
+.level:active{transform:translateY(6px);box-shadow:0 3px 0 #0003}
+.level b{display:block;font-size:clamp(28px,4vw,48px);margin-bottom:10px}
+.level span{font-size:clamp(16px,2vw,23px);line-height:1.4}
+.level1{background:linear-gradient(#47bf72,#23844b)}.level2{background:linear-gradient(#ffae3c,#e4691e)}.level3{background:linear-gradient(#8971fa,#513bb8)}
+.menu-brand{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.menu-brand img{width:54px;height:54px;border-radius:13px}.menu-brand b{color:var(--navy);font-size:23px}
+@media(max-width:700px){.levels{grid-template-columns:1fr}.level{min-height:125px}}
+
+/* GAME */
+#gameScreen{flex-direction:column;background:linear-gradient(#65c7ff 0%,#e1f6ff 55%,#c3976e 55%,#91684c 100%)}
+.topbar{height:16vh;min-height:104px;display:flex;align-items:center;justify-content:space-between;padding:9px 15px;color:white;background:linear-gradient(#18395ff2,#18395fb5);box-shadow:0 5px 15px #0005;z-index:20}
+.game-brand{display:flex;align-items:center;gap:8px;min-width:165px}.game-brand img{width:54px;height:54px;object-fit:cover;border-radius:13px;border:2px solid white}.game-brand b{font-size:clamp(14px,2vw,22px)}
+.floor-card{text-align:center}.floor-card #floorNumber{font-size:clamp(43px,7vw,82px);line-height:.9;color:var(--yellow);text-shadow:0 4px 0 #814d00}.floor-card #floorWord{font-size:clamp(16px,2vw,28px)}
+.reward-hud{display:flex;align-items:center;gap:12px;font-size:clamp(15px,2vw,23px);font-weight:900}
+.hud-box{padding:7px 11px;border-radius:13px;background:#ffffff20;border:2px solid #ffffff80;text-align:center}
+#hearts{color:#ff5c65;letter-spacing:2px}#starCount{color:#ffe44e}#combo{color:#8fffa9}
+#soundBtn{width:52px;height:52px;border-radius:50%;border:3px solid white;background:#ffffff25;color:white;font-size:26px}
+
+#world{position:relative;flex:1;overflow:hidden}
+#shaft{position:absolute;left:50%;top:0;bottom:0;width:min(43vw,420px);transform:translateX(-50%);background:linear-gradient(90deg,#222,#687680 9%,#aabac3 14%,#40515b 48%,#aabac3 86%,#687680 91%,#222);border-left:8px solid #3b2c26;border-right:8px solid #3b2c26;box-shadow:0 0 30px #0009}
+.rail{position:absolute;top:0;bottom:0;width:8px;background:#20272c}.r1{left:26%}.r2{right:26%}
+#elevator{position:absolute;left:50%;bottom:12%;width:70%;height:25%;transform:translateX(-50%);background:linear-gradient(90deg,#c3a779,#f4dfae,#b8945e);border:7px solid #6d5438;border-radius:12px 12px 4px 4px;box-shadow:0 9px 16px #0008;overflow:hidden}
+#elevator.jump{transform:translateX(-50%) translateY(-50px)}
+.door{position:absolute;top:0;bottom:0;width:50%;background:linear-gradient(90deg,#8b7659,#d9c49a,#967f5f);border:2px solid #685339}.door.left{left:0}.door.right{right:0}
+#elevator.open .left{transform:translateX(-93%)}#elevator.open .right{transform:translateX(93%)}
+.inside{position:absolute;inset:8%;display:flex;align-items:center;justify-content:center;color:#ffe86d;background:#1a2b3d;font-size:clamp(34px,6vw,64px);border:4px solid #d4b86e;text-shadow:0 3px #000}
+#stairs{position:absolute;inset:0;pointer-events:none}.step{position:absolute;height:32px;border-radius:5px;background:linear-gradient(#e6c89d,#a98258);border:3px solid #735336;box-shadow:0 8px 0 #65472f,0 12px 13px #0005}
+#character{position:absolute;left:calc(50% - 24px);bottom:38%;width:48px;height:66px;z-index:9}.head{position:absolute;width:37px;height:37px;left:6px;top:0;background:#ffd2a3;border:3px solid #583725;border-radius:50%}.hair{position:absolute;width:38px;height:17px;left:5px;top:-1px;background:#54321f;border-radius:22px 22px 8px 8px}.body{position:absolute;width:38px;height:34px;left:5px;top:32px;background:#45a766;border:3px solid #245c3a;border-radius:12px}#character.bounce{transform:translateY(-25px) rotate(-5deg)}
+#message{position:absolute;left:50%;top:3%;transform:translateX(-50%);min-width:290px;max-width:88vw;padding:12px 22px;border-radius:24px;text-align:center;color:var(--navy);font-size:clamp(21px,3vw,37px);font-weight:900;background:#fffffff2;border:4px solid var(--navy);box-shadow:0 7px 15px #0004;opacity:0;z-index:15}
+#message.show{opacity:1;transform:translateX(-50%) scale(1.03)}
+#rewardPop{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%) scale(.5);font-size:clamp(35px,8vw,90px);font-weight:900;color:#ffd83b;text-shadow:0 5px 0 #8f5700,0 8px 18px #0007;opacity:0;z-index:40;pointer-events:none}
+#rewardPop.pop{animation:pop .7s ease-out}@keyframes pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}35%{opacity:1;transform:translate(-50%,-50%) scale(1.2)}100%{opacity:0;transform:translate(-50%,-70%) scale(1)}}
+
+.controls{height:18vh;min-height:118px;display:flex;align-items:center;justify-content:center;padding:12px;background:#153654;border-top:6px solid var(--yellow)}
+#jumpBtn{width:min(72vw,560px);height:min(13vh,112px);min-height:82px;border:0;border-radius:30px;color:white;font-size:clamp(30px,6vw,62px);font-weight:900;background:linear-gradient(#ff914d,#ef3e23);box-shadow:0 8px 0 #9c2517,0 12px 18px #0007;user-select:none}
+#jumpBtn.counting{background:linear-gradient(#ffd34e,#f28c20);color:var(--navy)}#jumpBtn.locked{background:linear-gradient(#888,#555);box-shadow:0 8px 0 #333}
+#jumpBtn:active,.pressed{transform:translateY(5px)!important;box-shadow:0 3px 0 #9c2517!important}
+#restartBtn,#levelsBtn{position:absolute;bottom:10px;border:0;border-radius:13px;padding:8px 12px;background:#ffffffdd;color:var(--navy);font-weight:bold;z-index:30}#restartBtn{right:10px}#levelsBtn{left:10px}
+
+/* FINISH + BADGES */
+#finishScreen{align-items:center;justify-content:center;flex-direction:column;text-align:center;color:white;background:radial-gradient(circle at 50% 25%,#65d3ff,#18365e 75%);padding:20px}
+.finish-logo{width:95px;height:95px;border-radius:24px;border:5px solid white;box-shadow:0 8px 18px #0005}
+#finishScreen h1{font-size:clamp(43px,8vw,92px);margin:8px 0 0;color:#ffe24f;text-shadow:0 6px 0 #9a5600}
+#finishStars{font-size:clamp(35px,6vw,70px)}
+.badge{margin:10px;padding:13px 25px;border-radius:24px;background:#ffffff18;border:4px solid #ffffff90;font-size:clamp(19px,3vw,34px);font-weight:900}
+#playAgain,#chooseLevel{padding:14px 28px;margin:7px;border:0;border-radius:999px;font-size:clamp(20px,3vw,32px);font-weight:900;color:white}#playAgain{background:#ff8b2b}#chooseLevel{background:#7358dc}
+</style>
+</head>
+<body>
+
+<section id="startScreen" class="screen active">
+  <div class="start-brand">
+    <img src="bigcat_logo.jpg" alt="Big Cat logo">
+    <div class="brand-copy"><b>BIG CAT ENGLISH</b><span>LEARN · PLAY · DISCOVER</span></div>
+  </div>
+  <div class="start-reward"><div class="stars">⭐⭐⭐⭐⭐</div>COLLECT 100 STARS!</div>
+  <div class="start-title"><h1>EMPIRE ELEVATOR CHALLENGE</h1><p>Climb to the 100th floor!</p></div>
+  <img id="buildingImage" src="empire_building.png" alt="Empire State Building">
+  <button id="startBtn">START</button>
+</section>
+
+<section id="levelScreen" class="screen">
+  <div class="menu-brand"><img src="bigcat_logo.jpg"><b>BIG CAT ENGLISH</b></div>
+  <h1>Choose Your Level</h1>
+  <p>Earn stars, build combos, and reach the top!</p>
+  <div class="levels">
+    <button class="level level1" data-level="1"><b>LEVEL 1</b><span>Cardinal Numbers<br>One, Two, Three…</span></button>
+    <button class="level level2" data-level="2"><b>LEVEL 2</b><span>Ordinal Numbers<br>First, Second, Third…</span></button>
+    <button class="level level3" data-level="3"><b>LEVEL 3</b><span>Say It & Jump<br>Press before 3 · 2 · 1 ends!</span></button>
+  </div>
+</section>
+
+<section id="gameScreen" class="screen">
+<header class="topbar">
+  <div class="game-brand"><img src="bigcat_logo.jpg"><b>BIG CAT<br>ENGLISH</b></div>
+  <div class="floor-card"><div id="floorNumber">1</div><div id="floorWord">One</div></div>
+  <div class="reward-hud">
+    <div class="hud-box"><div id="hearts">❤️❤️❤️</div><small>LIVES</small></div>
+    <div class="hud-box"><div id="starCount">⭐ 0</div><small>STARS</small></div>
+    <div class="hud-box"><div id="combo">🔥 x0</div><small>COMBO</small></div>
+    <button id="soundBtn">🔊</button>
+  </div>
+</header>
+<main id="world">
+  <div id="message"></div><div id="rewardPop">+1 ⭐</div>
+  <div id="shaft"><div class="rail r1"></div><div class="rail r2"></div>
+    <div id="elevator" class="open"><div class="inside" id="elevatorDisplay">1</div><div class="door left"></div><div class="door right"></div></div>
+  </div>
+  <div id="stairs"></div>
+  <div id="character"><div class="head"></div><div class="hair"></div><div class="body"></div></div>
+  <button id="levelsBtn">☰ Levels</button><button id="restartBtn">↻ Restart</button>
+</main>
+<footer class="controls"><button id="jumpBtn">JUMP!</button></footer>
+</section>
+
+<section id="finishScreen" class="screen">
+  <img class="finish-logo" src="bigcat_logo.jpg">
+  <h1>EMPIRE MASTER!</h1>
+  <div id="finishStars">⭐⭐⭐⭐⭐</div>
+  <div class="badge" id="finishResult">100 Floors Cleared!</div>
+  <div><button id="playAgain">PLAY AGAIN</button><button id="chooseLevel">LEVELS</button></div>
+</section>
+
+<script>
+(()=>{
+const screens=[startScreen,levelScreen,gameScreen,finishScreen];
+let floor=1,level=1,busy=false,soundOn=true,audioCtx=null,countdownTimer=null,canJump=true;
+let stars=0,combo=0,lives=3,misses=0;
+
+const ord=["","First","Second","Third","Fourth","Fifth","Sixth","Seventh","Eighth","Ninth","Tenth","Eleventh","Twelfth","Thirteenth","Fourteenth","Fifteenth","Sixteenth","Seventeenth","Eighteenth","Nineteenth"];
+const card=["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+const tens=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+const tensOrd=["","","Twentieth","Thirtieth","Fortieth","Fiftieth","Sixtieth","Seventieth","Eightieth","Ninetieth"];
+
+function show(s){screens.forEach(x=>x.classList.remove("active"));s.classList.add("active")}
+function suffix(n){let v=n%100;if(v>=11&&v<=13)return"th";return n%10===1?"st":n%10===2?"nd":n%10===3?"rd":"th"}
+function cardinal(n){if(n===100)return"One Hundred";if(n<20)return card[n];let t=Math.floor(n/10),o=n%10;return o?`${tens[t]}-${card[o].toLowerCase()}`:tens[t]}
+function ordinal(n){if(n===100)return"One Hundredth";if(n<20)return ord[n];let t=Math.floor(n/10),o=n%10;return o?`${tens[t]}-${ord[o].toLowerCase()}`:tensOrd[t]}
+function ensureAudio(){if(!audioCtx)audioCtx=new(AudioContext||webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume()}
+function tone(f,s,d,type="sine",v=.15){if(!soundOn)return;ensureAudio();let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(.0001,audioCtx.currentTime+s);g.gain.exponentialRampToValueAtTime(v,audioCtx.currentTime+s+.015);g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+s+d);o.connect(g).connect(audioCtx.destination);o.start(audioCtx.currentTime+s);o.stop(audioCtx.currentTime+s+d+.02)}
+function ding(){tone(900,0,.22);tone(1350,.04,.28,"sine",.1)}
+function rewardSound(){tone(660,0,.12);tone(880,.10,.15);tone(1100,.22,.22)}
+function failSound(){tone(220,0,.22,"sawtooth",.08);tone(160,.18,.28,"sawtooth",.07)}
+function speak(t,r=.9){if(!soundOn||!("speechSynthesis"in window))return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang="en-US";u.rate=r;u.pitch=1.08;speechSynthesis.speak(u)}
+
+function makeStairs(){stairs.innerHTML="";for(let i=0;i<7;i++){let s=document.createElement("div");s.className="step";let side=i%2===0?1:-1,w=115+i*8;s.style.width=w+"px";s.style.left=`calc(50% + ${side*(90+i*13)}px - ${w/2}px)`;s.style.bottom=(7+i*7.2)+"%";s.style.transform=`scale(${.72+i*.045})`;stairs.appendChild(s)}}
+function updateUI(){
+  if(level===1){floorNumber.textContent=floor;floorWord.textContent=cardinal(floor)}
+  else{floorNumber.textContent=floor+suffix(floor);floorWord.textContent=ordinal(floor)}
+  elevatorDisplay.textContent=floor;
+  hearts.textContent="❤️".repeat(lives)+"🖤".repeat(Math.max(0,3-lives));
+  starCount.textContent=`⭐ ${stars}`;
+  combo.textContent=`🔥 x${combo}`;
+}
+function msg(t,ms=1000){message.textContent=t;message.classList.add("show");setTimeout(()=>message.classList.remove("show"),ms)}
+function popReward(text="+1 ⭐"){rewardPop.textContent=text;rewardPop.classList.remove("pop");void rewardPop.offsetWidth;rewardPop.classList.add("pop")}
+function clearCountdown(){if(countdownTimer){clearInterval(countdownTimer);countdownTimer=null}}
+
+function earnReward(){
+  stars++;combo++;
+  if(combo%10===0){stars+=2;popReward("+3 ⭐ COMBO!");msg(`Amazing! ${combo} combo!`,850)}
+  else popReward("+1 ⭐");
+  rewardSound();updateUI();
+}
+
+function loseLife(){
+  misses++;combo=0;lives--;updateUI();failSound();
+  if(lives<=0){
+    msg("No lives! Bonus reset.",1000);
+    speak("Try again!");
+    setTimeout(()=>{lives=3;updateUI();elevator.classList.add("open");startCountdown()},900);
+  }else{
+    msg("Too late! Try this floor again.",950);
+    speak("Too late. Try again.");
+    setTimeout(()=>{elevator.classList.add("open");startCountdown()},800);
+  }
+}
+
+function arrival(){
+  ding();canJump=true;jumpBtn.disabled=false;jumpBtn.className="";
+  if(level===1){jumpBtn.textContent="JUMP!";msg(cardinal(floor));setTimeout(()=>speak(cardinal(floor)),80)}
+  else if(level===2){jumpBtn.textContent="JUMP!";msg(ordinal(floor));setTimeout(()=>speak(ordinal(floor)),80)}
+  else startCountdown();
+}
+function startCountdown(){
+  clearCountdown();let count=3;canJump=true;jumpBtn.disabled=false;jumpBtn.className="counting";
+  jumpBtn.textContent=`SAY ${ordinal(floor).toUpperCase()} · ${count}`;
+  msg(`Say “${ordinal(floor)}” and jump!`,1200);speak(`${ordinal(floor)}. Say it and jump!`,1);
+  countdownTimer=setInterval(()=>{
+    count--;
+    if(count>0){jumpBtn.textContent=`SAY ${ordinal(floor).toUpperCase()} · ${count}`;tone(620,0,.1,"square",.07);speak(String(count),1.15)}
+    else{
+      clearCountdown();canJump=false;jumpBtn.disabled=true;jumpBtn.className="locked";jumpBtn.textContent="DOORS CLOSED!";
+      elevator.classList.remove("open");loseLife();
+    }
+  },800);
+}
+function reset(){
+  clearCountdown();floor=1;busy=false;canJump=true;stars=0;combo=0;lives=3;misses=0;
+  updateUI();makeStairs();elevator.className="open";show(gameScreen);setTimeout(arrival,180)
+}
+function selectLevel(n){level=n;reset()}
+
+function finish(){
+  clearCountdown();
+  let rating=misses===0?5:misses<=2?4:misses<=5?3:misses<=9?2:1;
+  finishStars.textContent="⭐".repeat(rating)+"☆".repeat(5-rating);
+  finishResult.textContent=`${stars} Stars · Best Combo x${combo} · ${misses} Misses`;
+  show(finishScreen);speak("One hundredth floor. Big Cat Empire Master!");rewardSound();setTimeout(rewardSound,350)
+}
+function nextFloor(){
+  if(busy||!canJump)return;
+  busy=true;clearCountdown();canJump=false;jumpBtn.disabled=true;jumpBtn.className="pressed";
+  earnReward();
+  if(level===3){speak(ordinal(floor),1.05);msg(`Great! ${ordinal(floor)}!`,600)}
+  tone(340,0,.07,"square",.07);tone(560,.05,.11,"sine",.1);character.classList.add("bounce");
+  setTimeout(()=>{character.classList.remove("bounce");elevator.classList.remove("open");tone(140,0,.2,"sawtooth",.035);elevator.style.transition="transform 220ms cubic-bezier(.2,.9,.2,1)";document.querySelectorAll(".door").forEach(x=>x.style.transition="transform 180ms");elevator.classList.add("jump")},80);
+  setTimeout(()=>{
+    elevator.classList.remove("jump");
+    if(floor<100)floor++;
+    updateUI();makeStairs();elevator.classList.add("open");
+    if(floor===100){setTimeout(finish,700)}
+    else{busy=false;jumpBtn.disabled=false;arrival()}
+  },430);
+}
+startBtn.onclick=()=>{ensureAudio();show(levelScreen)};
+document.querySelectorAll(".level").forEach(b=>b.onclick=()=>selectLevel(Number(b.dataset.level)));
+jumpBtn.onpointerdown=e=>{e.preventDefault();nextFloor()};
+document.addEventListener("keydown",e=>{if(gameScreen.classList.contains("active")&&(e.code==="Space"||e.code==="ArrowUp")){e.preventDefault();nextFloor()}});
+soundBtn.onclick=()=>{soundOn=!soundOn;soundBtn.textContent=soundOn?"🔊":"🔇";if(!soundOn&&"speechSynthesis"in window)speechSynthesis.cancel()};
+restartBtn.onclick=reset;levelsBtn.onclick=()=>{clearCountdown();show(levelScreen)};playAgain.onclick=reset;chooseLevel.onclick=()=>show(levelScreen);
+makeStairs();updateUI();
+})();
+</script>
+</body>
+</html>
