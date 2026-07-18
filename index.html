@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Empire State Elevator – Ordinal Number Game</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial Rounded MT Bold,Trebuchet MS,Arial,sans-serif;background:#8fd3ff;touch-action:manipulation}
+.screen{position:fixed;inset:0;display:none}.screen.active{display:flex}
+button{font:inherit;cursor:pointer}
+#startScreen{align-items:center;justify-content:center;background:#fff}
+#startImage{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+#startOverlay{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4.7vh}
+#startBtn{width:min(42vw,360px);height:min(12vw,92px);min-height:62px;border:0;border-radius:999px;color:#fff;font-size:clamp(30px,5vw,58px);font-weight:900;background:linear-gradient(#ff9c21,#ed4b1b);box-shadow:0 8px 0 #a83216,0 12px 22px #0005}
+#startBtn:active{transform:translateY(5px);box-shadow:0 3px 0 #a83216}
+
+#levelScreen{align-items:center;justify-content:center;flex-direction:column;padding:25px;background:linear-gradient(#5bc2ff,#e9f8ff)}
+#levelScreen h1{margin:0 0 8px;color:#18395f;font-size:clamp(35px,6vw,72px)}
+#levelScreen p{margin:0 0 22px;color:#35546f;font-size:clamp(18px,2.5vw,30px)}
+.levels{width:min(920px,96vw);display:grid;grid-template-columns:repeat(3,1fr);gap:17px}
+.level{min-height:210px;border:0;border-radius:28px;padding:20px 14px;color:white;box-shadow:0 9px 0 #0003,0 16px 25px #0003;text-align:center}
+.level:active{transform:translateY(6px);box-shadow:0 3px 0 #0003}
+.level b{display:block;font-size:clamp(28px,4vw,48px);margin-bottom:10px}
+.level span{display:block;font-size:clamp(16px,2vw,24px);line-height:1.35}
+.level1{background:linear-gradient(#43b96f,#23814a)}
+.level2{background:linear-gradient(#ffab35,#e56b1d)}
+.level3{background:linear-gradient(#846cff,#4d3ab7)}
+@media(max-width:700px){.levels{grid-template-columns:1fr}.level{min-height:130px}}
+
+#gameScreen{flex-direction:column;background:linear-gradient(#65c7ff 0%,#e1f6ff 55%,#c3976e 55%,#91684c 100%)}
+.topbar{height:15vh;min-height:100px;display:flex;align-items:center;justify-content:space-between;padding:10px 18px;color:#fff;background:linear-gradient(#18395fee,#18395faa);box-shadow:0 5px 15px #0005;z-index:20}
+.floor-card{display:flex;align-items:center;gap:15px}
+#floorNumber{min-width:105px;text-align:center;font-size:clamp(48px,8vw,90px);line-height:.9;color:#ffd84d;text-shadow:0 4px 0 #814d00}
+.floor-words{font-size:clamp(22px,3vw,42px);line-height:1.08;text-shadow:0 3px 5px #0008}
+.small{font-size:.55em;opacity:.9}.status{text-align:center;font-size:clamp(16px,2vw,27px);font-weight:900}
+#speedLabel{color:#ffe76d}
+#soundBtn{width:58px;height:58px;border-radius:50%;border:3px solid white;background:#ffffff25;color:white;font-size:28px}
+
+#world{position:relative;flex:1;overflow:hidden}
+#shaft{position:absolute;left:50%;top:0;bottom:0;width:min(43vw,420px);transform:translateX(-50%);background:linear-gradient(90deg,#222,#687680 9%,#aabac3 14%,#40515b 48%,#aabac3 86%,#687680 91%,#222);border-left:8px solid #3b2c26;border-right:8px solid #3b2c26;box-shadow:0 0 30px #0009}
+.rail{position:absolute;top:0;bottom:0;width:8px;background:#20272c}.r1{left:26%}.r2{right:26%}
+#elevator{position:absolute;left:50%;bottom:12%;width:70%;height:25%;transform:translateX(-50%);background:linear-gradient(90deg,#c3a779,#f4dfae,#b8945e);border:7px solid #6d5438;border-radius:12px 12px 4px 4px;box-shadow:0 9px 16px #0008;overflow:hidden}
+#elevator.jump{transform:translateX(-50%) translateY(-50px)}
+.door{position:absolute;top:0;bottom:0;width:50%;background:linear-gradient(90deg,#8b7659,#d9c49a,#967f5f);border:2px solid #685339}.door.left{left:0}.door.right{right:0}
+#elevator.open .left{transform:translateX(-93%)}#elevator.open .right{transform:translateX(93%)}
+.inside{position:absolute;inset:8%;display:flex;align-items:center;justify-content:center;color:#ffe86d;background:#1a2b3d;font-size:clamp(34px,6vw,64px);border:4px solid #d4b86e;text-shadow:0 3px #000}
+
+#stairs{position:absolute;inset:0;pointer-events:none}.step{position:absolute;height:32px;border-radius:5px;background:linear-gradient(#e6c89d,#a98258);border:3px solid #735336;box-shadow:0 8px 0 #65472f,0 12px 13px #0005}
+#character{position:absolute;left:calc(50% - 24px);bottom:38%;width:48px;height:66px;z-index:9}
+.head{position:absolute;width:37px;height:37px;left:6px;top:0;background:#ffd2a3;border:3px solid #583725;border-radius:50%}.hair{position:absolute;width:38px;height:17px;left:5px;top:-1px;background:#54321f;border-radius:22px 22px 8px 8px}.body{position:absolute;width:38px;height:34px;left:5px;top:32px;background:#45a766;border:3px solid #245c3a;border-radius:12px}
+#character.bounce{transform:translateY(-25px) rotate(-5deg)}
+#message{position:absolute;left:50%;top:3%;transform:translateX(-50%);min-width:290px;max-width:88vw;padding:12px 22px;border-radius:24px;text-align:center;color:#17385f;font-size:clamp(21px,3vw,37px);font-weight:900;background:#fffffff2;border:4px solid #17385f;box-shadow:0 7px 15px #0004;opacity:0;z-index:15}
+#message.show{opacity:1;transform:translateX(-50%) scale(1.03)}
+
+.controls{height:18vh;min-height:118px;display:flex;align-items:center;justify-content:center;padding:12px;background:#153654;border-top:6px solid #ffd44c}
+#jumpBtn{width:min(72vw,560px);height:min(13vh,112px);min-height:82px;border:0;border-radius:30px;color:white;font-size:clamp(30px,6vw,62px);font-weight:900;background:linear-gradient(#ff914d,#ef3e23);box-shadow:0 8px 0 #9c2517,0 12px 18px #0007;user-select:none}
+#jumpBtn.counting{background:linear-gradient(#ffd34e,#f28c20);color:#17385f}
+#jumpBtn.locked{background:linear-gradient(#888,#555);box-shadow:0 8px 0 #333;opacity:.8}
+#jumpBtn:active,.pressed{transform:translateY(5px)!important;box-shadow:0 3px 0 #9c2517!important}
+#restartBtn,#levelsBtn{position:absolute;bottom:10px;border:0;border-radius:13px;padding:8px 12px;background:#ffffffdd;color:#17385f;font-weight:bold;z-index:30}
+#restartBtn{right:10px}#levelsBtn{left:10px}
+
+#finishScreen{align-items:center;justify-content:center;flex-direction:column;text-align:center;color:white;background:radial-gradient(circle at 50% 30%,#65d3ff,#18365e 75%);padding:30px}
+#finishScreen h1{font-size:clamp(48px,9vw,110px);margin:0;color:#ffe24f;text-shadow:0 6px 0 #9a5600}
+#finishScreen h2{font-size:clamp(28px,5vw,58px);margin:15px}
+#playAgain,#chooseLevel{padding:16px 32px;margin:8px;border:0;border-radius:999px;font-size:clamp(22px,3vw,36px);font-weight:900;color:white}
+#playAgain{background:#ff8b2b}#chooseLevel{background:#7358dc}
+</style>
+</head>
+<body>
+<section id="startScreen" class="screen active">
+  <img id="startImage" src="empire_start.png" alt="Empire State Building">
+  <div id="startOverlay"><button id="startBtn">START</button></div>
+</section>
+
+<section id="levelScreen" class="screen">
+  <h1>Choose Your Level</h1>
+  <p>Ride from the 1st floor to the 100th floor!</p>
+  <div class="levels">
+    <button class="level level1" data-level="1"><b>LEVEL 1</b><span>Number Listening<br>Hear: one, two, three…</span></button>
+    <button class="level level2" data-level="2"><b>LEVEL 2</b><span>Ordinal Listening<br>Hear: first, second, third…</span></button>
+    <button class="level level3" data-level="3"><b>LEVEL 3</b><span>Say It Before Doors Close<br>3 · 2 · 1 countdown!</span></button>
+  </div>
+</section>
+
+<section id="gameScreen" class="screen">
+<header class="topbar">
+  <div class="floor-card"><div id="floorNumber">1</div><div class="floor-words"><span class="small">FLOOR</span><br><span id="floorWord">One</span></div></div>
+  <div class="status"><div id="levelLabel">LEVEL 1</div><div id="speedLabel">READY</div></div>
+  <button id="soundBtn">🔊</button>
+</header>
+<main id="world">
+  <div id="message"></div>
+  <div id="shaft"><div class="rail r1"></div><div class="rail r2"></div>
+    <div id="elevator" class="open"><div class="inside" id="elevatorDisplay">1</div><div class="door left"></div><div class="door right"></div></div>
+  </div>
+  <div id="stairs"></div>
+  <div id="character"><div class="head"></div><div class="hair"></div><div class="body"></div></div>
+  <button id="levelsBtn">☰ Levels</button><button id="restartBtn">↻ Restart</button>
+</main>
+<footer class="controls"><button id="jumpBtn">JUMP!</button></footer>
+</section>
+
+<section id="finishScreen" class="screen">
+<h1>100th!</h1><h2>One Hundredth Floor</h2>
+<p style="font-size:clamp(22px,4vw,42px)">🎉 Congratulations! 🎉</p>
+<div><button id="playAgain">PLAY AGAIN</button><button id="chooseLevel">LEVELS</button></div>
+</section>
+
+<script>
+(()=>{
+const screens=[startScreen,levelScreen,gameScreen,finishScreen];
+let floor=1,level=1,busy=false,soundOn=true,audioCtx=null,countdownTimer=null,canJump=true;
+const ord=["","First","Second","Third","Fourth","Fifth","Sixth","Seventh","Eighth","Ninth","Tenth","Eleventh","Twelfth","Thirteenth","Fourteenth","Fifteenth","Sixteenth","Seventeenth","Eighteenth","Nineteenth"];
+const card=["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+const tens=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+const tensOrd=["","","Twentieth","Thirtieth","Fortieth","Fiftieth","Sixtieth","Seventieth","Eightieth","Ninetieth"];
+function show(s){screens.forEach(x=>x.classList.remove("active"));s.classList.add("active")}
+function suffix(n){let v=n%100;if(v>=11&&v<=13)return"th";return n%10===1?"st":n%10===2?"nd":n%10===3?"rd":"th"}
+function cardinal(n){if(n===100)return"One Hundred";if(n<20)return card[n];let t=Math.floor(n/10),o=n%10;return o?`${tens[t]}-${card[o].toLowerCase()}`:tens[t]}
+function ordinal(n){if(n===100)return"One Hundredth";if(n<20)return ord[n];let t=Math.floor(n/10),o=n%10;return o?`${tens[t]}-${ord[o].toLowerCase()}`:tensOrd[t]}
+function ensureAudio(){if(!audioCtx)audioCtx=new(AudioContext||webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume()}
+function tone(f,s,d,type="sine",v=.15){if(!soundOn)return;ensureAudio();let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(.0001,audioCtx.currentTime+s);g.gain.exponentialRampToValueAtTime(v,audioCtx.currentTime+s+.015);g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+s+d);o.connect(g).connect(audioCtx.destination);o.start(audioCtx.currentTime+s);o.stop(audioCtx.currentTime+s+d+.02)}
+function ding(){tone(900,0,.22);tone(1350,.04,.28,"sine",.1)}
+function beep(){tone(600,0,.12,"square",.08)}
+function speak(t,r=.9){if(!soundOn||!("speechSynthesis"in window))return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang="en-US";u.rate=r;u.pitch=1.08;speechSynthesis.speak(u)}
+function makeStairs(){stairs.innerHTML="";for(let i=0;i<7;i++){let s=document.createElement("div");s.className="step";let side=i%2===0?1:-1,w=115+i*8;s.style.width=w+"px";s.style.left=`calc(50% + ${side*(90+i*13)}px - ${w/2}px)`;s.style.bottom=(7+i*7.2)+"%";s.style.transform=`scale(${.72+i*.045})`;stairs.appendChild(s)}}
+function updateUI(){
+  if(level===1){floorNumber.textContent=floor;floorWord.textContent=cardinal(floor)}
+  else{floorNumber.textContent=floor+suffix(floor);floorWord.textContent=ordinal(floor)}
+  elevatorDisplay.textContent=floor;levelLabel.textContent=`LEVEL ${level}`;
+  if(level!==3)speedLabel.textContent=level===1?"CARDINAL NUMBER":"ORDINAL NUMBER";
+}
+function msg(t,ms=1000){message.textContent=t;message.classList.add("show");setTimeout(()=>message.classList.remove("show"),ms)}
+function clearCountdown(){if(countdownTimer){clearInterval(countdownTimer);countdownTimer=null}}
+function arrival(){
+  ding(); canJump=true; jumpBtn.disabled=false; jumpBtn.className="";
+  if(level===1){
+    jumpBtn.textContent="JUMP!";
+    msg(`${cardinal(floor)}!`);
+    setTimeout(()=>speak(cardinal(floor)),100);
+  }else if(level===2){
+    jumpBtn.textContent="JUMP!";
+    msg(`${ordinal(floor)}!`);
+    setTimeout(()=>speak(ordinal(floor)),100);
+  }else{
+    startCountdown();
+  }
+}
+function startCountdown(){
+  clearCountdown();let count=3;canJump=true;
+  jumpBtn.className="counting";jumpBtn.textContent=`SAY ${ordinal(floor).toUpperCase()} · ${count}`;
+  speedLabel.textContent="SAY IT NOW!";
+  msg(`Say “${ordinal(floor)}” and jump before the doors close!`,1500);
+  speak(`${ordinal(floor)}. Say it and jump!`,1);
+  beep();
+  countdownTimer=setInterval(()=>{
+    count--;
+    if(count>0){
+      jumpBtn.textContent=`SAY ${ordinal(floor).toUpperCase()} · ${count}`;
+      beep(); speak(String(count),1.15);
+    }else{
+      clearCountdown();canJump=false;jumpBtn.disabled=true;jumpBtn.className="locked";jumpBtn.textContent="DOORS CLOSED!";
+      speedLabel.textContent="TOO LATE!";
+      elevator.classList.remove("open");ding();
+      msg("Too late! Try this floor again.",1100);speak("Too late. Try again.");
+      setTimeout(()=>{
+        elevator.classList.add("open");canJump=true;jumpBtn.disabled=false;startCountdown();
+      },900);
+    }
+  },800);
+}
+function reset(){
+  clearCountdown();floor=1;busy=false;canJump=true;updateUI();makeStairs();elevator.className="open";show(gameScreen);setTimeout(arrival,180)
+}
+function selectLevel(n){level=n;reset()}
+function nextFloor(){
+  if(busy||!canJump)return;
+  busy=true;clearCountdown();canJump=false;jumpBtn.disabled=true;jumpBtn.className="pressed";
+  if(level===3){speak(ordinal(floor),1.05);msg(`Great! ${ordinal(floor)}!`,650)}
+  tone(340,0,.07,"square",.07);tone(560,.05,.11,"sine",.1);character.classList.add("bounce");
+  setTimeout(()=>{character.classList.remove("bounce");elevator.classList.remove("open");tone(140,0,.2,"sawtooth",.035);elevator.style.transition="transform 220ms cubic-bezier(.2,.9,.2,1)";document.querySelectorAll(".door").forEach(x=>x.style.transition="transform 180ms");elevator.classList.add("jump")},80);
+  setTimeout(()=>{
+    elevator.classList.remove("jump");if(floor<100)floor++;updateUI();makeStairs();elevator.classList.add("open");
+    if(floor===100){setTimeout(()=>{show(finishScreen);speak("One hundredth floor. Congratulations!");ding()},700)}
+    else{busy=false;jumpBtn.disabled=false;arrival()}
+  },430);
+}
+startBtn.onclick=()=>{ensureAudio();show(levelScreen)};
+document.querySelectorAll(".level").forEach(b=>b.onclick=()=>selectLevel(Number(b.dataset.level)));
+jumpBtn.onpointerdown=e=>{e.preventDefault();nextFloor()};
+document.addEventListener("keydown",e=>{if(gameScreen.classList.contains("active")&&(e.code==="Space"||e.code==="ArrowUp")){e.preventDefault();nextFloor()}});
+soundBtn.onclick=()=>{soundOn=!soundOn;soundBtn.textContent=soundOn?"🔊":"🔇";if(!soundOn&&"speechSynthesis"in window)speechSynthesis.cancel()};
+restartBtn.onclick=reset;levelsBtn.onclick=()=>{clearCountdown();show(levelScreen)};playAgain.onclick=reset;chooseLevel.onclick=()=>show(levelScreen);
+makeStairs();updateUI();
+})();
+</script>
+</body>
+</html>
